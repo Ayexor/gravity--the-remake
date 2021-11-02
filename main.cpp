@@ -96,6 +96,13 @@ inline long double squarelen(vec vector)
   return vector.x * vector.x + vector.y * vector.y;
 }
 
+typedef enum tracetype
+  {
+    none,
+    circletrace,
+    linetrace
+  };
+
 /////////////////////////////////////////////////
 // physics code
 /////////////////////////////////////////////////
@@ -196,7 +203,7 @@ int main()
   SDL_Event e;
   bool running = true;
   bool pause = true;
-  bool tracing = true;
+  tracetype tracing = none;
   const uint8_t* keys = SDL_GetKeyboardState(NULL);
   
   while (running)
@@ -208,7 +215,7 @@ int main()
       if (e.type == SDL_KEYUP)
       {
 	if (e.key.keysym.sym == SDLK_SPACE) pause = !pause;
-	if (e.key.keysym.sym == SDLK_t) tracing = !tracing;
+	if (e.key.keysym.sym == SDLK_t) if (tracing == none) tracing = circletrace; else tracing = none;
       }
     }
 
@@ -230,17 +237,35 @@ int main()
     SDL_RenderClear(ren);
     for (int i = 0; i < NUM_OBJS; i++)
     {
+      SDL_SetRenderDrawColor(ren, color[i].r, color[i].g, color[i].b, color[i].a);
       if (len(trace[i].front() - objects[i].pos) >objects[i].radius)
       {
         trace[i].push_front(objects[i].pos);
         if (trace[i].size() > 128) trace[i].pop_back();
       }
       int j = 128;
-      for (vec iter : trace[i])
-	if (tracing)
-	  filledCircleColor(ren, iter.x + 640, 360 - iter.y,
-			    objects[i].radius,
-			  *(unsigned int*)(color + i) + (max(j--, 0) <<  24));
+      switch(tracing)
+      {
+      case none:
+	break;
+	
+      case circletrace:
+	for (vec iter : trace[i])
+	  filledCircleColor(ren, iter.x + 640, 360 - iter.y, objects[i].radius, *(unsigned int*)(color + i) + (max(j--, 0) <<  24));
+	break;
+
+      case linetrace:
+	SDL_FPoint* points = new SDL_FPoint[trace[i].size()];
+	int k = 0;
+	for (vec iter : trace[i])
+	  points[k++] = {float(iter.x + 640), float(360 - iter.y)};
+	
+	SDL_RenderDrawLinesF(ren, points, k);
+		    
+		       
+
+      }
+	  
       
       filledCircleColor(ren, objects[i].pos.x + 640, 360 - objects[i].pos.y,
 			objects[i].radius,

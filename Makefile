@@ -9,7 +9,7 @@ build: $(OBJECTS) Makefile
 	$(COMP) -o $(OUT) $(OBJECTS) $(FLAGS) $(LIBS)
 
 run: build
-	exec ./$(OUT)
+	./$(OUT)
 
 clean:
 	rm $(OUT)
