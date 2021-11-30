@@ -1,7 +1,7 @@
 
 OUT = gravity
 COMP = clang++
-FLAGS = -O2
+FLAGS = -O2 -I/usr/include/SDL2
 LIBS = -lSDL2 -lSDL2_gfx
 OBJECTS = main.o
 
@@ -15,7 +15,7 @@ clean:
 	rm $(OUT)
 	rm $(OBJECTS)
 
-%.o: %.cpp
+%.o: %.cpp mat2.h
 	$(COMP) -c $< -o $@ $(FLAGS) 
 
 
